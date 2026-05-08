@@ -15,8 +15,10 @@ Custom skills for [Hermes Agent](https://github.com/NousResearch/hermes-agent).
 # Clone
 git clone https://github.com/TimFooLabs/hermes-custom-skills.git /tmp/hcs
 
-# Copy skills to Hermes
-cp -r /tmp/hcs/software-development/* ~/.hermes/skills/software-development/
+# Copy skills to Hermes (productivity category)
+mkdir -p ~/.hermes/skills/productivity
+cp -r /tmp/hcs/software-development/double-check ~/.hermes/skills/productivity/
+cp -r /tmp/hcs/software-development/handoff ~/.hermes/skills/productivity/
 ```
 
 Then add quick command shorthands to `~/.hermes/config.yaml` under `quick_commands:`:
@@ -24,10 +26,10 @@ Then add quick command shorthands to `~/.hermes/config.yaml` under `quick_comman
 ```yaml
   dc:
     type: exec
-    command: cat ~/.hermes/skills/software-development/double-check/SKILL.md
+    command: cat ~/.hermes/skills/productivity/double-check/SKILL.md
   handoff:
     type: exec
-    command: cat ~/.hermes/skills/software-development/handoff/SKILL.md
+    command: cat ~/.hermes/skills/productivity/handoff/SKILL.md
 ```
 
 Start a new session (`/reset` in CLI, or new chat in gateway/WebUI) to activate.
@@ -44,8 +46,8 @@ Start a new session (`/reset` in CLI, or new chat in gateway/WebUI) to activate.
 ## Uninstall
 
 ```bash
-rm -rf ~/.hermes/skills/software-development/double-check
-rm -rf ~/.hermes/skills/software-development/handoff
+rm -rf ~/.hermes/skills/productivity/double-check
+rm -rf ~/.hermes/skills/productivity/handoff
 ```
 
 Remove the `dc:` and `handoff:` entries from `quick_commands:` in `config.yaml`.
