@@ -4,14 +4,14 @@ description: "Generates a structured handoff prompt for transitioning to a new s
 argument-hint: "[optional: task summary]"
 ---
 
-Generate a concise handoff prompt for transitioning to a new subagent session.
+**Execute the steps below in order. Output the completed handoff prompt to the user.**
 
 ## Step 1: Gather Environment Context
 
 Run these commands to collect the current state:
 
 ```bash
-pwd                          # working directory
+pwd
 git branch --show-current 2>/dev/null || echo "not a git repo"
 git status --short 2>/dev/null || echo "n/a"
 ```
