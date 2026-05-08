@@ -11,17 +11,27 @@ Custom skills for [Hermes Agent](https://github.com/NousResearch/hermes-agent).
 
 ## Install
 
-```bash
-# Clone
-git clone https://github.com/TimFooLabs/hermes-custom-skills.git /tmp/hcs
+**Fresh install:**
 
-# Copy skills to Hermes (workflow category)
+```bash
+git clone https://github.com/TimFooLabs/hermes-custom-skills.git /tmp/hcs
 mkdir -p ~/.hermes/skills/workflow
 cp -r /tmp/hcs/software-development/double-check ~/.hermes/skills/workflow/
 cp -r /tmp/hcs/software-development/handoff ~/.hermes/skills/workflow/
 ```
 
-Then add quick command shorthands to `~/.hermes/config.yaml` under `quick_commands:`:
+**Update existing install:**
+
+```bash
+rm -rf ~/.hermes/skills/workflow/double-check
+rm -rf ~/.hermes/skills/workflow/handoff
+git clone https://github.com/TimFooLabs/hermes-custom-skills.git /tmp/hcs
+mkdir -p ~/.hermes/skills/workflow
+cp -r /tmp/hcs/software-development/double-check ~/.hermes/skills/workflow/
+cp -r /tmp/hcs/software-development/handoff ~/.hermes/skills/workflow/
+```
+
+**Register quick commands** — add to `~/.hermes/config.yaml` under `quick_commands:` (skip if already present):
 
 ```yaml
   dc:
