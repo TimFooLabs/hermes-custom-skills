@@ -16,8 +16,8 @@ Custom skills for [Hermes Agent](https://github.com/NousResearch/hermes-agent).
 ```bash
 git clone https://github.com/TimFooLabs/hermes-custom-skills.git /tmp/hcs
 mkdir -p ~/.hermes/skills/workflow
-cp -r /tmp/hcs/software-development/double-check ~/.hermes/skills/workflow/
-cp -r /tmp/hcs/software-development/handoff ~/.hermes/skills/workflow/
+cp -r /tmp/hcs/workflow/double-check ~/.hermes/skills/workflow/
+cp -r /tmp/hcs/workflow/handoff ~/.hermes/skills/workflow/
 ```
 
 **Update existing install:**
@@ -27,8 +27,8 @@ rm -rf ~/.hermes/skills/workflow/double-check
 rm -rf ~/.hermes/skills/workflow/handoff
 git clone https://github.com/TimFooLabs/hermes-custom-skills.git /tmp/hcs
 mkdir -p ~/.hermes/skills/workflow
-cp -r /tmp/hcs/software-development/double-check ~/.hermes/skills/workflow/
-cp -r /tmp/hcs/software-development/handoff ~/.hermes/skills/workflow/
+cp -r /tmp/hcs/workflow/double-check ~/.hermes/skills/workflow/
+cp -r /tmp/hcs/workflow/handoff ~/.hermes/skills/workflow/
 ```
 
 **Register quick commands** — add to `~/.hermes/config.yaml` under `quick_commands:` (skip if already present):
