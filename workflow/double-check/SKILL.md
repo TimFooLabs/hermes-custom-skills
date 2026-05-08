@@ -5,11 +5,11 @@ description: "Force the agent to rigorously verify its own work before declaring
 
 Please double-check your work and what you generated.
 
-- Is it really complete?
-- Did you approach it from different angles?
+1. Define what "complete" means in this context.
+2. Define at what angles you can approach this.
+3. Did you approach it from different angles?
+4. Is it really complete?
 
-Define first at what angles you can approach this.
 Reiterate on the goal and what it means and what is required to achieve it.
-Define what "complete" means in this context.
 
-Proceed with the double check only after you are sure you have done all of the above.
+Only proceed with the double check after you are sure you've done all of the above.
