@@ -82,38 +82,11 @@ Phase 2:  Exact Duplicate Detection → references/01-exact-dedup.md
           ├── Quality heuristic ranking (§6)
           └── Present duplicate groups with recommendations
 
-Phase 3:  Video Duplicate Detection → references/02-video-dedup.md
-          ├── VDF visual similarity scan
-          ├── Optional: partial clip detection
-          ├── Optional: videohash for lightweight checks
-          └── Present similar video groups
-
-Phase 4:  Semantic Duplicate Detection → references/03-semantic-dedup.md
-          └── semhash for document collections (optional, power-user)
-
-Phase 5:  Organization Proposal → references/04-organization.md
-          ├── Proposed folder structure
-          ├── Batch move/rename plan
-          └── Archive candidates
-
-Phase 6:  User Review
-          └── Present full plan. Wait for confirmation.
-
-Phase 7:  Apply (if confirmed)
-          ├── Generate undo manifest
-          ├── Execute dedup actions first (before organizing)
-          ├── Execute organization moves
-          ├── Cleanup empty directories
-          └── Final report + manifest path
-
-Phase 8:  Rollback (if needed)
-          └── Restore from undo manifest
-```
-
 **Critical ordering:** Deduplicate BEFORE organizing. Otherwise duplicates get scattered into different folders and become harder to find.
 
 ## Safety Rules
 
+0. **Quarantine-first.** Never delete directly from NAS. All candidates move to `/target/_quarantine/` with 30+ day hold.
 1. **Never auto-delete.** Always present findings and get confirmation.
 2. **Undo manifest first.** Generate `manifest.json` + `rollback.sh` before any destructive action.
 3. **Filesystem checks before linking:**
@@ -121,10 +94,103 @@ Phase 8:  Rollback (if needed)
    - Check reflink support before using `--link-type reflink`
    - Check mount points: `df /path1 /path2` — never hardlink across devices
    - Never link inside cloud-sync folders (Dropbox, OneDrive, etc.)
-4. **Symlink policy:** `follow_symlinks: false` by default. Never follow symlinks during scan. Warn if symlinks are detected in scan path.
+   - CIFS/NAS: hardlinks likely unsupported; plan for move-to-quarantine instead
+4. **Symlink policy:** `follow_symlinks: false` by default. Never follow symlinks during scan.
 5. **Quality over recency:** Don't just keep "newest" or "best-named." Use ffprobe for media quality ranking. Prefer editable originals over exports for documents.
 6. **Timeout protection:** All subprocess calls must have timeouts (3600s default).
-7. **WSL path handling:** Normalize `/mnt/c/` etc. Warn about slower cross-filesystem hashing. NTFS is case-insensitive — handle accordingly.
+7. **WSL path handling:** Normalize `/mnt/c/` etc. Warn about slower cross-filesystem hashing. NTFS is case-insensitive.
+8. **Canonical source priority:** Define before dedup. Device backups > Google Photos > Drive > messaging > downloads.
+9. **Separate exact from perceptual:** Run fclones/rmlint (exact hash) BEFORE Czkawka/VDF (perceptual). Stabilize before fuzzy matching.
+
+## Quarantine Structure
+
+Before any destructive action, create:
+
+```
+/target/_quarantine/
+  duplicates-candidate/    # Files confirmed as duplicates (held 30+ days)
+  empty-dirs/             # Empty directories (not deleted, just moved)
+  archive-review/         # Old files for manual review
+  safe-to-delete/         # After 30+ day hold, manual review passed
+```
+
+**Rules:**
+- Move (never copy+delete on NAS)
+- Preserve original relative path inside quarantine
+- Log every move to manifest.json
+- 30-day minimum hold before any deletion
+- Deletion only from `safe-to-delete/` after manual review
+
+## Execution Flow
+
+```
+Phase 0:  Pre-flight
+          ├── NAS snapshot / backup verification
+          ├── Create _quarantine/ structure
+          ├── Verify filesystem type & capabilities
+          ├── Check for cloud-sync folders → warn
+          └── Confirm scope with user
+
+Phase 1:  Define Canonical Source Rules
+          ├── Document priority hierarchy for photos, videos, documents
+          └── Get user approval on rules
+
+Phase 2:  Full Inventory (read-only)
+          ├── Directory overview (file count, size, types)
+          ├── Date/size distribution
+          ├── Identify empty dirs, loose files, junk
+          └── Present summary. No changes.
+
+Phase 3:  Exact Duplicate Audit (read-only)
+          ├── fclones group scan → JSON report
+          ├── rmlint scan → JSON report (also: empty files, broken symlinks)
+          ├── Parse & normalize results
+          └── Present duplicate groups with recommendations + confidence scores
+
+Phase 4:  Exact Duplicate Quarantine
+          ├── User reviews Phase 3 report
+          ├── Move non-canonical copies to _quarantine/duplicates-candidate/
+          ├── Apply canonical source rules from Phase 1
+          ├── Generate undo manifest
+          └── HOLD 30+ days
+
+Phase 5:  Integrity Verification
+          ├── Re-scan and compare with Phase 2 baseline
+          ├── Verify media server paths still work
+          ├── Spot-check quarantined files against originals (hash compare)
+          └── Confirm no files were accidentally moved
+
+Phase 6:  Perceptual Photo Dedup (Czkawka) — targeted
+          ├── Scope: photo directories only (not videos)
+          ├── Czkawka in audit mode → review matches
+          ├── Move duplicates to quarantine
+          └── HOLD 30+ days
+
+Phase 7:  Perceptual Video Dedup (VDF) — targeted folders only
+          ├── Scope: known overlap areas only (not entire drive)
+          ├── VDF audit mode → review matches
+          ├── Use ffprobe quality ranking
+          └── Move duplicates to quarantine, HOLD 30+ days
+
+Phase 8:  Organization (only after all dedup complete and verified)
+          ├── Proposed folder structure for surviving files
+          ├── Move into canonical structure
+          ├── Cleanup empty directories (move to quarantine first)
+          ├── Update media server library paths if needed
+          └── Final report + manifest path
+
+Phase 9:  30-Day Hold & Final Cleanup
+          ├── Wait 30 days after last quarantine action
+          ├── Manual review of _quarantine/ contents
+          ├── Delete from safe-to-delete/ only after manual review
+          └── Final verification: re-scan, compare with baseline
+```
+
+**Critical ordering:**
+- Deduplicate BEFORE organizing — otherwise duplicates get scattered
+- Exact dedup BEFORE perceptual dedup — stabilize with hash-based first
+- Quarantine BEFORE deletion — always move first, delete after hold
+- Folder reorganization LAST — only after all dedup is verified
 
 ## Undo Manifest Schema
 
