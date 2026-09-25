@@ -46,6 +46,21 @@ github-agent-token --repo TimFooLabs/a --repo TimFooLabs/b
 - Script: `~/.hermes/bin/github-agent-token` (stdlib + openssl only).
 - TODO: `echo 'GITHUB_APP_ID=5072487' >> ~/.hermes/.env` (pending user consent).
 
+## Server deployment (Paperclip on the VPS, 2026-09-25)
+
+- Second key copy + minter live at `/root/.hermes/secrets/github-app.pem` /
+  `/root/.hermes/bin/github-agent-token` (symlinked into `/usr/local/bin`);
+  `GITHUB_APP_ID=5072487` in `/root/.hermes/.env`. Verify with
+  `github-agent-token --list` → `install_id=164772300 TimFooLabs (User)`.
+- **Never copy the key into the Paperclip container**, even though the image has
+  python3 + openssl and the minter would run fine there: any agent process could
+  then mint for ALL installed repos, and company isolation becomes
+  instruction-following instead of a credential property.
+- The Paperclip pattern is a **host-side re-mint timer**
+  (`paperclip-github-secrets.timer`, every 30 min) that pushes fresh ≤60-min
+  tokens into Paperclip's company secret store via the board API. Static tokens
+  in env/compose are unacceptable — they go stale; expired = 401, fail closed.
+
 ## Rules
 
 - **Read-only unless the task truly writes.** Default to no `--write`.
